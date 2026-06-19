@@ -13,6 +13,13 @@ import customtkinter as ctk
 
 now_dir = os.getcwd()
 sys.path.append(now_dir)
+
+# Install the torchcrepe/torchaudio compatibility shim BEFORE any module
+# that imports torchcrepe (vc_infer_pipeline does). This is required under
+# torch+cu132 because no compatible torchaudio wheel exists. See
+# _torchcrepe_compat.py for details.
+import _torchcrepe_compat  # noqa: F401  (side-effect import)
+
 tmp = os.path.join(now_dir, "TEMP")
 os.makedirs(os.path.join(now_dir, "models"), exist_ok=True)
 os.makedirs(os.path.join(now_dir, "output"), exist_ok=True)
@@ -244,7 +251,7 @@ def get_vc(weight_root, sid):
         return {"visible": False, "__type__": "update"}
     person = (weight_root)
     print("loading %s" % person)
-    cpt = torch.load(person, map_location="cpu")
+    cpt = torch.load(person, map_location="cpu", weights_only=False)
     tgt_sr = cpt["config"][-1]
     cpt["config"][-3] = cpt["weight"]["emb_g.weight"].shape[0]  # n_spk
     if_f0 = cpt.get("f0", 1)

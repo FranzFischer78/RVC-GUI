@@ -74,7 +74,7 @@ net_g = SynthesizerTrn256(
 # weights=torch.load("infer/ft-mi-freeze-vocoder-flow-enc_q_1k.pt")
 # weights=torch.load("infer/ft-mi-freeze-vocoder_true_1k.pt")
 # weights=torch.load("infer/ft-mi-sim1k.pt")
-weights = torch.load("infer/ft-mi-no_opt-no_dropout.pt")
+weights = torch.load("infer/ft-mi-no_opt-no_dropout.pt", weights_only=False)
 print(net_g.load_state_dict(weights, strict=True))
 
 net_g.eval().to(device)
@@ -112,7 +112,7 @@ def get_f0(x, p_len, f0_up_key=0):
     f0_mel[f0_mel <= 1] = 1
     f0_mel[f0_mel > 255] = 255
     # f0_mel[f0_mel > 188] = 188
-    f0_coarse = np.rint(f0_mel).astype(np.int)
+    f0_coarse = np.rint(f0_mel).astype(np.int_)
     return f0_coarse, f0bak
 
 

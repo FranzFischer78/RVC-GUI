@@ -5,3 +5,15 @@ __pycache__
 hubert_base.pt
 /logs
 models/
+
+# uv-managed virtual environment and local Python installs
+.venv/
+.uv-cache/
+.uv-python/
+
+# Build artifacts
+*.egg-info/
+*.whl
+dist/
+build/
+
