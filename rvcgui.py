@@ -13,6 +13,13 @@ import customtkinter as ctk
 
 now_dir = os.getcwd()
 sys.path.append(now_dir)
+
+# Install the torchcrepe/torchaudio compatibility shim BEFORE any module
+# that imports torchcrepe (vc_infer_pipeline does). This is required under
+# torch+cu132 because no compatible torchaudio wheel exists. See
+# _torchcrepe_compat.py for details.
+import _torchcrepe_compat  # noqa: F401  (side-effect import)
+
 tmp = os.path.join(now_dir, "TEMP")
 os.makedirs(os.path.join(now_dir, "models"), exist_ok=True)
 os.makedirs(os.path.join(now_dir, "output"), exist_ok=True)
@@ -83,6 +90,9 @@ is_half = config.is_half
 
 def load_hubert():
     global hubert_model
+    # Auto-download hubert_base.pt from HuggingFace if it's missing.
+    # The shim is imported at the top of this file as `_torchcrepe_compat`.
+    _torchcrepe_compat.ensure_hubert_base_pt()
     models, _, _ = checkpoint_utils.load_model_ensemble_and_task(
         ["hubert_base.pt"],
         suffix="",
@@ -244,7 +254,7 @@ def get_vc(weight_root, sid):
         return {"visible": False, "__type__": "update"}
     person = (weight_root)
     print("loading %s" % person)
-    cpt = torch.load(person, map_location="cpu")
+    cpt = torch.load(person, map_location="cpu", weights_only=False)
     tgt_sr = cpt["config"][-1]
     cpt["config"][-3] = cpt["weight"]["emb_g.weight"].shape[0]  # n_spk
     if_f0 = cpt.get("f0", 1)
