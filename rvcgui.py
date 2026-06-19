@@ -90,6 +90,9 @@ is_half = config.is_half
 
 def load_hubert():
     global hubert_model
+    # Auto-download hubert_base.pt from HuggingFace if it's missing.
+    # The shim is imported at the top of this file as `_torchcrepe_compat`.
+    _torchcrepe_compat.ensure_hubert_base_pt()
     models, _, _ = checkpoint_utils.load_model_ensemble_and_task(
         ["hubert_base.pt"],
         suffix="",
